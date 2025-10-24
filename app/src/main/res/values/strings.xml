@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Runner Challenges</string>
+    <string name="welcome_message">Bienvenido, Corredor!</string>
+    <string name="daily_challenge">Desafío del Día</string>
+    <string name="start_challenge">Comenzar Desafío</string>
+    <string name="view_ranking">Ver Ranking</string>
+    <string name="logout">Cerrar Sesión</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="register">Registrarse</string>
+</resources>

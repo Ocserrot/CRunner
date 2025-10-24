@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Carrera por Kilómetros"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Modo de Carrera -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Modo de Carrera"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
+
+                <RadioGroup
+                    android:id="@+id/radioRaceMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radioCircular"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ruta Circular"
+                        android:checked="true"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ruta circular automática desde tu ubicación"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <RadioButton
+                        android:id="@+id/radioFreeRun"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Run Free"
+                        android:layout_marginBottom="8px"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Corre libremente, la app mide tu distancia"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_marginStart="32dp"
+                        android:layout_marginBottom="12px"/>
+
+                    <RadioButton
+                        android:id="@+id/radioOutBack"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ida y Vuelta"
+                        android:layout_marginBottom="8px"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Corre hasta la mitad de distancia y regresa"
+                        android:textSize="12sp"
+                        android:textColor="@android:color/darker_gray"
+                        android:layout_marginStart="32dp"/>
+
+                </RadioGroup>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Selector de Distancia -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Distancia Objetivo"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12px"/>
+
+                <!-- Distancias Predefinidas -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="4">
+
+                    <Button
+                        android:id="@+id/btn1km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="1km"
+                        android:layout_marginEnd="4dp"
+                        android:backgroundTint="@color/colorPrimary"/>
+
+                    <Button
+                        android:id="@+id/btn3km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="3km"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                    <Button
+                        android:id="@+id/btn5km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="5km"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                    <Button
+                        android:id="@+id/btn10km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="10km"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                </LinearLayout>
+
+                <!-- Distancias Largas -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="3"
+                    android:layout_marginTop="8dp">
+
+                    <Button
+                        android:id="@+id/btn21km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="21km"
+                        android:layout_marginEnd="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                    <Button
+                        android:id="@+id/btn42km"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="42km"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                    <Button
+                        android:id="@+id/btnCustom"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Personalizada"
+                        android:layout_marginStart="4dp"
+                        android:backgroundTint="@android:color/darker_gray"/>
+
+                </LinearLayout>
+
+                <!-- Selector Personalizado -->
+                <LinearLayout
+                    android:id="@+id/layoutCustomDistance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:weightSum="2"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone">
+
+                    <EditText
+                        android:id="@+id/etCustomDistance"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Distancia en km"
+                        android:inputType="numberDecimal"
+                        android:layout_marginEnd="8dp"/>
+
+                    <Button
+                        android:id="@+id/btnSetCustom"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Establecer"
+                        android:layout_marginStart="8dp"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tvSelectedDistance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Distancia seleccionada: 1 km"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginTop="12dp"/>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Configuración de Tiempo -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Objetivo de Tiempo (Opcional)"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"/>
+
+                <CheckBox
+                    android:id="@+id/cbTimeGoal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Establecer tiempo objetivo"
+                    android:layout_marginBottom="8dp"/>
+
+            <!-- Selector de tiempo personalizado - VERSIÓN CORREGIDA -->
+            <LinearLayout
+                android:id="@+id/layoutTimeGoal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="3"
+                android:visibility="gone">
+
+                <!-- Horas -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Horas"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <NumberPicker
+                        android:id="@+id/npGoalHours"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <!-- Minutos -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Minutos"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <NumberPicker
+                        android:id="@+id/npGoalMinutes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <!-- Segundos -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Segundos"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <NumberPicker
+                        android:id="@+id/npGoalSeconds"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+            <TextView
+            android:id="@+id/tvPace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ritmo necesario: --:-- min/km"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"/>
+            </LinearLayout>
+
+
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Información de la Carrera -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:backgroundTint="#E8F5E8">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Resumen de la Carrera"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:gravity="center"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:id="@+id/tvRaceSummary"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Modo: Ruta Circular\nDistancia: 1 km\nTiempo: Sin objetivo"
+                    android:textSize="14sp"
+                    android:gravity="center"
+                    android:lineSpacingExtra="4dp"/>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Botón de Inicio -->
+        <Button
+            android:id="@+id/btnStartDistanceRace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Comenzar Carrera"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="16dp"
+            android:backgroundTint="@color/colorPrimary"/>
+
+    </LinearLayout>
+
+</ScrollView>
