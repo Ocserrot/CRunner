@@ -1,6 +1,9 @@
 package com.sebastiantorres.crunner;
 
+import static com.google.ar.sceneform.rendering.Color.*;
+
 import android.annotation.SuppressLint;
+import android.app.assist.AssistStructure;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -9,23 +12,30 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
+import com.google.ar.sceneform.rendering.Color;
 import com.google.maps.android.PolyUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Scanner;
 
 public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -42,7 +52,8 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
     private NumberPicker npHours, npMinutes, npSeconds;
     private Button btnStartRace;
 
-    private LatLng selectedDestination;
+    private LatLng selectedDestination = null;
+    private double calculatedDistance = 0;
     private LatLng currentLocation;
     private Polyline routePolyline;
     private Marker destinationMarker;
@@ -102,7 +113,7 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
     private void setupClickListeners() {
         // Buscar dirección
         etSearch.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 searchLocation(etSearch.getText().toString());
                 return true;
             }
@@ -128,8 +139,31 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
             }
         });
 
-        // Iniciar carrera
-        btnStartRace.setOnClickListener(v -> startCustomRace());
+        // Iniciar la wea de carrera
+        btnStartRace.setOnClickListener(v -> {
+            // --- MODIFICA LA LÓGICA AQUÍ ---
+            if (selectedDestination != null && currentLocation != null) {
+                Intent intent = new Intent(CustomRaceActivity.this, RunningActivity.class);
+                intent.putExtra("raceType", "custom"); // Identifica el tipo de carrera
+                intent.putExtra("originLat", currentLocation.latitude);
+                intent.putExtra("originLng", currentLocation.longitude);
+                intent.putExtra("destLat", selectedDestination.latitude);
+                intent.putExtra("destLng", selectedDestination.longitude);
+                intent.putExtra("distance", (int) calculatedDistance); // Envía la distancia en metros
+
+                // Obtén el límite de tiempo si lo hay
+                long timeLimit = 0; // en segundos
+                AssistStructure.ViewNode cbTimeGoal = null;
+                if (cbTimeGoal.isChecked()) {
+                    timeLimit = (npHours.getValue() * 3600) + (npMinutes.getValue() * 60) + npSeconds.getValue();
+                }
+                intent.putExtra("timeLimit", timeLimit);
+
+                startActivity(intent);
+            } else {
+                Toast.makeText(this, "No se seleccionó un destino válido.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void setupNumberPickers() {
@@ -182,7 +216,7 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
             return;
         }
 
-        fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, location -> {
@@ -202,31 +236,114 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     @Override
-    public void onMapClick(LatLng latLng) {
-        selectedDestination = latLng;
+    public void onMapClick(LatLng destination) {
+        // 1. Limpiar marcadores y rutas anteriores
+        mMap.clear();
 
-        // Remover marcador anterior
-        if (destinationMarker != null) {
-            destinationMarker.remove();
-        }
+        // 2. Añadir un marcador en el punto de destino
+        mMap.addMarker(new MarkerOptions().position(destination).title("Destino"));
 
-        // Añadir nuevo marcador
-        destinationMarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .title("Destino")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-
-        // Ocultar instrucciones
-        tvInstructions.setVisibility(View.GONE);
-
-        // Calcular ruta si tenemos ubicación actual
+        // 3. Obtener la ubicación actual del usuario como origen
         if (currentLocation != null) {
-            calculateRoute(currentLocation, latLng);
+            // --- SOLUCIÓN ---
+            // 'currentLocation' ya es el origen que necesitas.
+            LatLng origin = currentLocation;
+
+            selectedDestination = destination; // Guarda el destino
+
+            // Colocar un marcador en el origen también es útil
+            // (Asegúrate de volver a poner el marcador de tu ubicación actual que se borró con mMap.clear())
+            mMap.addMarker(new MarkerOptions()
+                    .position(origin)
+                    .title("Tu ubicación")
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+
+            // 4. Calcular y dibujar la ruta
+            fetchRoute(origin, destination);
+
+            // 5. Ocultar las instrucciones iniciales
+            TextView tvInstructions = findViewById(R.id.tvInstructions);
+            if (tvInstructions != null) {
+                tvInstructions.setVisibility(View.GONE);
+            }
         } else {
-            Toast.makeText(this, "Esperando ubicación actual...", Toast.LENGTH_SHORT).show();
-            getCurrentLocation();
+            Toast.makeText(this, "No se puede obtener la ubicación actual. Activa el GPS.", Toast.LENGTH_SHORT).show();
         }
     }
+    private void fetchRoute(LatLng origin, LatLng destination) {
+        String apiKey = "AIzaSyBEeTi2tCfLeIHCrgz_jIJ6FEF2sBaph5Q"; // ¡IMPORTANTE! Mueve esto a un lugar seguro, no lo dejes en el código.
+        String url = "https://maps.googleapis.com/maps/api/directions/json?origin="
+                + origin.latitude + "," + origin.longitude + "&destination="
+                + destination.latitude + "," + destination.longitude
+                + "&mode=walking" // Modo caminata, ideal para correr
+                + "&key=" + apiKey;
+
+        // Ejecutar la petición de red en un hilo separado para no bloquear la UI
+        new Thread(() -> {
+            try {
+                // Este es un ejemplo muy básico de petición de red.
+                // Es MEJOR usar Volley, Retrofit, o OkHttp.
+                URL requestUrl = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection) requestUrl.openConnection();
+                InputStream in = new BufferedInputStream(conn.getInputStream());
+                Scanner s = new Scanner(in).useDelimiter("\\A");
+                String result = s.hasNext() ? s.next() : "";
+
+                // Procesar la respuesta JSON
+                JSONObject json = new JSONObject(result);
+                JSONArray routes = json.getJSONArray("routes");
+                if (routes.length() > 0) {
+                    JSONObject route = routes.getJSONObject(0);
+                    JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
+                    String encodedPolyline = overviewPolyline.getString("points");
+
+                    // Decodificar la polilínea y dibujarla en el mapa (en el hilo principal)
+                    List<LatLng> decodedPath = PolyUtil.decode(encodedPolyline);
+                    runOnUiThread(() -> {
+                        mMap.addPolyline(new PolylineOptions().addAll(decodedPath).width(12f).color(android.graphics.Color.BLUE));
+
+                        // Actualizar la UI con la información de la ruta
+                        updateRouteInfo(route);
+                    });
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() -> Toast.makeText(CustomRaceActivity.this, "Error al obtener la ruta.", Toast.LENGTH_SHORT).show());
+            }
+        }).start();
+    }
+
+    // Método auxiliar para actualizar la tarjeta de información
+    private void updateRouteInfo(JSONObject route) {
+        try {
+            JSONObject leg = route.getJSONArray("legs").getJSONObject(0);
+            String distance = leg.getJSONObject("distance").getString("text");
+            String duration = leg.getJSONObject("duration").getString("text");
+
+            // Calcula el tiempo sugerido para correr (ej: a 6 min/km)
+            double distanceInMeters = leg.getJSONObject("distance").getDouble("value");
+            int suggestedTimeInMinutes = (int) ((distanceInMeters / 1000.0) * 6);
+
+            calculatedDistance = leg.getJSONObject("distance").getDouble("value"); // Distancia en metros
+
+            // Muestra la información en la UI
+            TextView tvDistance = findViewById(R.id.tvDistance);
+            TextView tvDuration = findViewById(R.id.tvDuration);
+            TextView tvSuggestedTime = findViewById(R.id.tvSuggestedTime);
+
+            tvDistance.setText(distance);
+            tvDuration.setText(duration);
+            tvSuggestedTime.setText(suggestedTimeInMinutes + " min");
+
+            // Mostrar la tarjeta y habilitar el botón de inicio
+            findViewById(R.id.cardRouteInfo).setVisibility(View.VISIBLE);
+            findViewById(R.id.btnStartRace).setEnabled(true);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void searchLocation(String query) {
         if (TextUtils.isEmpty(query)) {
@@ -422,6 +539,6 @@ public class CustomRaceActivity extends AppCompatActivity implements OnMapReadyC
     }
 
     private void setupLocationClient() {
-        fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
     }
 }

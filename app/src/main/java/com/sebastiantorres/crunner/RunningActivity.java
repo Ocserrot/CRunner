@@ -30,10 +30,13 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class RunningActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -215,7 +218,28 @@ public class RunningActivity extends AppCompatActivity implements OnMapReadyCall
             fusedLocationClient.removeLocationUpdates(locationCallback);
         }
         showResults();
+        saveRunToHistory();
+
     }
+
+    private void saveRunToHistory() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Crear un objeto para guardar la carrera
+        Map<String, Object> runData = new HashMap<>();
+        runData.put("timestamp", FieldValue.serverTimestamp()); // Guarda la fecha y hora
+        runData.put("distance", totalDistance); // Distancia en metros
+        runData.put("duration", elapsedTime); // Duración en milisegundos
+        // Puedes añadir el tipo de carrera, la ruta (como JSON), etc.
+        // runData.put("raceType", "circular");
+
+        db.collection("users").document(userId).collection("runs")
+                .add(runData)
+                .addOnSuccessListener(documentReference -> Log.d("SAVE_RUN", "Carrera guardada con ID: " + documentReference.getId()))
+                .addOnFailureListener(e -> Log.e("SAVE_RUN", "Error al guardar la carrera", e));
+    }
+
 
     private void showResults() {
         RunResult runResult = new RunResult();
